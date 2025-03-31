@@ -32,13 +32,22 @@ def unblock_websites(websites):
     except UnicodeDecodeError:
         print("Error reading the hosts file. Please ensure it is encoded in UTF-8.")
 
+def read_websites_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            websites = [line.strip() for line in file if line.strip()]
+        return websites
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return []
+    except Exception as e:
+        print(f"Error reading file: {str(e)}")
+        return []
+
 if __name__ == "__main__":
-    websites_to_unblock = [
-        "www.youtube.com",
-        "youtube.com",
-        "www.bilibili.com",
-        "bilibili.com"
-    ]
-    unblock_websites(websites_to_unblock)
+    websites_file = "websites_to_block.txt"
+    websites_to_unblock = read_websites_from_file(websites_file)
+    if websites_to_unblock:
+        unblock_websites(websites_to_unblock)
     # 如果需要恢复整个文件，请取消注释以下行并提供备份路径
     # restore_hosts_file('/path/to/your/backup')

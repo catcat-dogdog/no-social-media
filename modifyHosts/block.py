@@ -32,11 +32,20 @@ def block_websites(websites):
     except PermissionError:
         print("Permission denied: Please run this script as an administrator or with sudo privileges.")
 
+def read_websites_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            websites = [line.strip() for line in file if line.strip()]
+        return websites
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return []
+    except Exception as e:
+        print(f"Error reading file: {str(e)}")
+        return []
+
 if __name__ == "__main__":
-    websites_to_block = [
-        "www.youtube.com",
-        "youtube.com",
-        "www.bilibili.com",
-        "bilibili.com"
-    ]
-    block_websites(websites_to_block)
+    websites_file = "websites_to_block.txt"
+    websites_to_block = read_websites_from_file(websites_file)
+    if websites_to_block:
+        block_websites(websites_to_block)
