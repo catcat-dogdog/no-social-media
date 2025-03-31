@@ -11,14 +11,28 @@
 (function() {
     'use strict';
 
-    // 用户可以在这里更改每个网站的禁止时间段（24小时制，精确到分钟）
-    const siteRestrictions = {
-        'bilibili.com': [
-            { start: '0:00', end: '07:30' },
-            { start: '8:30', end: '12:00' },
-            { start: '14:00', end: '17:00' },
-            { start: '19:00', end: '22:00' }
-        ]
+    // 配置区域开始
+    const CONFIG = {
+        // 网站访问限制时间段（24小时制，精确到分钟）
+        siteRestrictions: {
+            'bilibili.com': [
+                { start: '0:00', end: '07:30' },
+                { start: '8:30', end: '12:00' },
+                { start: '14:00', end: '17:00' },
+                { start: '19:00', end: '22:00' }
+            ]
+        },
+        // 提示间隔时间（分钟）
+        promptInterval: 5,
+        // 关闭页面自动封锁延迟（分钟）
+        autoBlockDelay: 1,
+        // 界面文本
+        messages: {
+            blocked: '访问被禁止',
+            blockedDesc: '您在此时间段无法访问此网站。',
+            unblockButton: '暂时解除封锁',
+            focusPrompt: (minutes) => `不知不觉已经使用社交媒体${minutes}分钟，请确认没有在浪费时间哦`
+        }
     };
 
     let unblockUntil = localStorage.getItem('unblockUntil') ? new Date(localStorage.getItem('unblockUntil')) : null;
@@ -31,7 +45,7 @@
 
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const blockedHours = siteRestrictions[site] || [];
+        const blockedHours = CONFIG.siteRestrictions[site] || [];
 
         return blockedHours.some(({ start, end }) => {
             const [startHour, startMinute] = start.split(':').map(Number);
@@ -49,7 +63,7 @@
 
     function getCurrentSite() {
         const hostname = window.location.hostname;
-        return Object.keys(siteRestrictions).find(site => hostname.includes(site));
+        return Object.keys(CONFIG.siteRestrictions).find(site => hostname.includes(site));
     }
 
     function pauseAllVideos() {
@@ -59,29 +73,21 @@
 
     function showFocusPrompt(minutes) {
         pauseAllVideos();
-        const message = `不知不觉已经使用社交媒体${minutes}分钟，请确认没有在浪费时间哦`;
-        if (confirm(`${message}\n\n选择"确定"继续使用，选择"取消"关闭网页。`)) {
-            scheduleFocusPrompts();
-        } else {
+        const message = CONFIG.messages.focusPrompt(minutes);
+        if (!confirm(`${message}\n\n选择"取消"关闭网页，选择"确定"继续使用。`)) {
             unblockUntil = null;
             localStorage.removeItem('unblockUntil');
-            clearInterval(focusInterval);
             window.location.href = 'about:blank';
         }
     }
 
     function scheduleFocusPrompts() {
-        const intervals = [0.2, 15, 30];
-        let index = 0;
-
+        let promptCount = 0;
+        
         focusInterval = setInterval(() => {
-            if (index < intervals.length) {
-                showFocusPrompt(intervals[index]);
-                index++;
-            } else {
-                clearInterval(focusInterval);
-            }
-        }, intervals[index] * 60 * 1000);
+            promptCount++;
+            showFocusPrompt(CONFIG.promptInterval * promptCount);
+        }, CONFIG.promptInterval * 60 * 1000);
     }
 
     function scheduleAutoBlock() {
@@ -89,7 +95,7 @@
             unblockUntil = null;
             localStorage.removeItem('unblockUntil');
             location.reload();
-        }, 60 * 1000); // 1 minute
+        }, CONFIG.autoBlockDelay * 60 * 1000);
     }
 
     const currentSite = getCurrentSite();
@@ -99,15 +105,15 @@
             scheduleAutoBlock();
         } else if (isBlockedTime(currentSite)) {
             document.body.innerHTML = `
-                <h1>访问被禁止</h1>
-                <p>您在此时间段无法访问此网站。</p>
-                <button id="unblockButton">暂时解除封锁</button>
+                <h1>${CONFIG.messages.blocked}</h1>
+                <p>${CONFIG.messages.blockedDesc}</p>
+                <button id="unblockButton">${CONFIG.messages.unblockButton}</button>
             `;
             document.body.style.textAlign = 'center';
             document.body.style.marginTop = '20%';
 
             document.getElementById('unblockButton').onclick = function() {
-                unblockUntil = new Date(new Date().getTime() + 5 * 60 * 1000);
+                unblockUntil = new Date(new Date().getTime() + 60 * 60 * 1000);
                 localStorage.setItem('unblockUntil', unblockUntil);
                 scheduleFocusPrompts();
                 scheduleAutoBlock();
