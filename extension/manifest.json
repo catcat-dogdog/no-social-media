@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "No Social Media",
+  "version": "1.0",
+  "description": "禁止访问特定视频网站或社交媒体",
+  "permissions": [
+    "declarativeNetRequest",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "*://*.facebook.com/*",
+    "*://*.twitter.com/*",
+    "*://*.youtube.com/*",
+    "*://*.bilibili.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "ruleset_1",
+      "enabled": true,
+      "path": "rules.json"
+    }]
+  }
+}
