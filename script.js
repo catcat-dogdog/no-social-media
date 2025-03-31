@@ -60,13 +60,13 @@
     function showFocusPrompt(minutes) {
         pauseAllVideos();
         const message = `不知不觉已经使用社交媒体${minutes}分钟，请确认没有在浪费时间哦`;
-        if (confirm(`${message}\n\n选择“确定”继续使用，选择“取消”关闭网页。`)) {
+        if (confirm(`${message}\n\n选择"确定"继续使用，选择"取消"关闭网页。`)) {
             scheduleFocusPrompts();
         } else {
             unblockUntil = null;
             localStorage.removeItem('unblockUntil');
             clearInterval(focusInterval);
-            window.close();
+            window.location.href = 'about:blank';
         }
     }
 
