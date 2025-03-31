@@ -1,11 +1,10 @@
 // ==UserScript==
-// @name         社交媒体访问限制
+// @name         No Social Media
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.1
 // @description  在特定时间段禁止访问特定社交媒体网站
-// @author       你的名字
+// @author       catcat-dogdog
 // @match        *://*.bilibili.com/*
-// @match        *://*.youtube.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -15,12 +14,6 @@
     // 用户可以在这里更改每个网站的禁止时间段（24小时制，精确到分钟）
     const siteRestrictions = {
         'bilibili.com': [
-            { start: '0:00', end: '07:30' },
-            { start: '8:30', end: '12:00' },
-            { start: '14:00', end: '17:00' },
-            { start: '19:00', end: '22:00' }
-        ],
-        'youtube.com': [
             { start: '0:00', end: '07:30' },
             { start: '8:30', end: '12:00' },
             { start: '14:00', end: '17:00' },
