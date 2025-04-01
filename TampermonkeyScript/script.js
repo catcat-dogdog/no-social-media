@@ -91,11 +91,23 @@
     }
 
     function scheduleAutoBlock() {
-        setTimeout(() => {
-            unblockUntil = null;
-            localStorage.removeItem('unblockUntil');
-            location.reload();
-        }, CONFIG.autoBlockDelay * 60 * 1000);
+        let autoBlockTimeout;
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                autoBlockTimeout = setTimeout(() => {
+                    unblockUntil = null;
+                    localStorage.removeItem('unblockUntil');
+                    if (!document.hidden) {
+                        location.reload();
+                    }
+                }, CONFIG.autoBlockDelay * 60 * 1000);
+            } else {
+                if (autoBlockTimeout) {
+                    clearTimeout(autoBlockTimeout);
+                }
+            }
+        });
     }
 
     const currentSite = getCurrentSite();
